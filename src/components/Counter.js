@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-const ErrorComponent = () => <div>{props.ignore}</div>;
+const ErrorComponent = () => <div>{/* props.ignore */}</div>;
 
 class Counter extends Component {
   constructor(props) {
@@ -9,7 +9,8 @@ class Counter extends Component {
 
     this.state = {
       counter: 0,
-      seed: 0
+      seed: 0,
+      initializing: true
     }
 
     this.increment = () => this.setState({counter: this.state.counter + 1});
@@ -30,6 +31,9 @@ class Counter extends Component {
   componentDidMount() {
     console.log('Component Did Mount ----- !!!');
     console.log('------------------');
+    setTimeout(() => {
+      this.setState({initializing: false})
+    }, 500)
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -46,26 +50,21 @@ class Counter extends Component {
   }
 
   getSnapshotBeforeUpdate(prevProps, prevState) {
-    console.log('Get Snapshot Befor Update ------ !!!')
+    console.log('Get Snapshot Before Update ------ !!!')
     return null;
-  }
-
-  componentDidUpdate(prevProps, prevState, snapshot) {
-    console.log('Component Did Update --------- !!!');
-    console.log('------------------');
-  }
-
-  componentDidCatch(error, errorInfo) {
-    console.log('Component Did Catch --------- !!!');
-  }
-
-  componentWillUnmount() {
-    console.log('Component Will Unmount -------- !!!');
-    console.log('------------------');
   }
     
   render() {
     console.log('Render ---------- !!!');
+
+    if (this.state.initializing) {
+      return <div>Inicializando...</div>
+    }
+
+    if (this.props.showErrorComponent && this.state.error) {
+      return <div>Hemos encontrado un error! {this.state.error.message}</div>
+    }
+
     return (
       <div>
         <button onClick={this.increment}>Incrementar</button>
@@ -73,9 +72,25 @@ class Counter extends Component {
         <div className='counter'>
             Contador: {this.state.counter}
         </div>
-        <ErrorComponent />
+        {this.props.showErrorComponent ? 
+          <ErrorComponent /> : null}
       </div>
     )
+  }
+
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    console.log('Component Did Update --------- !!!');
+    console.log('------------------');
+  }
+
+  componentWillUnmount() {
+    console.log('Component Will Unmount -------- !!!');
+    console.log('------------------');
+  }
+
+  componentDidCatch(error, info) {
+    console.log('Component Did Catch --------- !!!');
+    this.setState({error, info});
   }
 }
 
